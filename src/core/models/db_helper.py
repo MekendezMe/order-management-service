@@ -12,7 +12,7 @@ class DatabaseHelper:
             max_overflow: int = 10,
             pool_size: int = 5
     ):
-        self.engine: AsyncEngine = create_async_engine(
+        self.engine = create_async_engine(
             url=url,
             echo=echo,
             echo_pool=echo_pool,
