@@ -8,22 +8,22 @@ from core.models import db_helper, Base
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(fastapi_app: FastAPI):
     async with db_helper.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
     await db_helper.dispose()
 
-main_app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
 
-main_app.include_router(
+app.include_router(
     api_router,
     prefix=settings.api.prefix
 )
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:main_app",
+        "main:app",
         host=settings.run.host,
         port=settings.run.port,
         reload=True
