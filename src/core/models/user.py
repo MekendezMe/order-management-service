@@ -4,3 +4,4 @@ from .base import Base
 class User(Base):
     __tablename__ = "users"
     username: Mapped[str] = mapped_column(unique=True)
+    login: Mapped[str] =  mapped_column(unique=True)
