@@ -29,3 +29,7 @@ class UserUpdate(BaseModel):
     name: str
     surname: str
     age: int
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
