@@ -17,8 +17,8 @@ class UserService:
 
 
     async def register(self, user_create: UserCreate) -> UserRead:
-        existing_user = await self.user_repository.get_by_email(user_create.email)
-        if existing_user:
+        user = await self.user_repository.get_by_email(user_create.email)
+        if not user:
             raise UserAlreadyExistException()
 
         if len(user_create.password) < 8:
@@ -38,13 +38,22 @@ class UserService:
         return model_to_read(new_user)
 
     async def login(self, user_login: UserLogin) -> UserRead:
-        existing_user = await self.user_repository.get_by_email(user_login.email)
-        if existing_user is None:
+        user = await self.user_repository.get_by_email(user_login.email)
+        if not user:
             raise UserNotFoundException()
 
-        if not verify_password(user_login.password, existing_user.password):
+        if not verify_password(user_login.password, user.password):
             raise IncorrectPasswordException()
 
-        return model_to_read(existing_user)
+        return model_to_read(user)
 
+    async def confirm_email(self, email) -> bool:
+        user = await self.user_repository.get_by_email(email)
+        if not user:
+            raise UserNotFoundException()
+
+        user.confirmed = True
+
+        updated_user = await self.user_repository.update(user)
+        return updated_user.confirmed
 

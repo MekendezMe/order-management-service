@@ -7,7 +7,7 @@ router = APIRouter(
     tags=["Authentification"]
 )
 
-@router.post("/register", response_model=UserRead, status_code=status.HTTP_200_OK)
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def register(
         user_create: UserCreate = Body(..., description="Данные для регистрации"),
         user_service: UserService = Depends(get_user_service)
@@ -28,6 +28,19 @@ async def login(
 ) -> UserRead:
     try:
         return await user_service.login(user_login)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.post("/confirm-email", response_model=bool, status_code=status.HTTP_200_OK)
+async def confirm_email(
+        email: str = Body(...),
+        user_service: UserService =  Depends(get_user_service)
+) -> bool:
+    try:
+        return await user_service.confirm_email(email)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
