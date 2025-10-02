@@ -6,7 +6,7 @@ from core.schemas.user import UserRead, UserCreate, UserLogin
 from core.services.user_service import UserService
 
 router = APIRouter(
-    tags=["Users"]
+    tags=["Authentification"]
 )
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_200_OK)

@@ -1,3 +1,4 @@
+from core.constants import ROLE_USER
 from core.exceptions.role import RoleNotFoundException
 from core.exceptions.user import InvalidPasswordLengthException, UserAlreadyExistException, UserNotFoundException, \
     IncorrectPasswordException
@@ -5,6 +6,7 @@ from core.models import User
 from core.repositories.role_repository import RoleRepository
 from core.repositories.user_repository import UserRepository
 from core.schemas.user import UserCreate, UserRead, UserLogin
+from core.services.mappers.user_mapper import create_to_model, model_to_read
 
 
 class UserService:
@@ -20,23 +22,16 @@ class UserService:
         if len(user_create.password) < 8:
             raise InvalidPasswordLengthException()
 
-        role = await self.role_repository.get_by_name("user")
+        role = await self.role_repository.get_by_name(ROLE_USER)
 
         if role is None:
             raise RoleNotFoundException()
 
-        user_model = User(
-            email=user_create.email,
-            password=user_create.password,
-            name=user_create.name,
-            surname=user_create.surname,
-            age=user_create.age,
-            role_id=role.id,
-        )
+        user_model = create_to_model(user_create, role=role)
 
         new_user = await self.user_repository.create(user_model)
 
-        return UserRead.model_validate(new_user)
+        return model_to_read(new_user)
 
     async def login(self, user_login: UserLogin) -> UserRead:
         existing_user = await self.user_repository.get_by_email(user_login.email)
@@ -46,6 +41,6 @@ class UserService:
         if existing_user.password != user_login.password:
             raise IncorrectPasswordException()
 
-        return UserRead.model_validate(existing_user)
+        return model_to_read(existing_user)
 
 

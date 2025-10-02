@@ -5,4 +5,4 @@ from .base import Base
 class Author(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    products: Mapped[list["Product"]] = relationship("Product", back_populates="author")
+    products: Mapped[list["Product"]] = relationship("Product")

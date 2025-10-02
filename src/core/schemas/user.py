@@ -9,7 +9,7 @@ class UserRead(BaseModel):
     name: str
     surname: str
     age: int
-    role: Role
+    role: str
     confirmed: bool
     is_active: bool
 
@@ -20,7 +20,6 @@ class UserCreate(BaseModel):
     name: str
     surname: str
     age: int
-    role: str
 
 class UserUpdate(BaseModel):
     id: int

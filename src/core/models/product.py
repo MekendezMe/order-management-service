@@ -10,7 +10,7 @@ class Product(Base):
     name: Mapped[str] =  mapped_column(String(50))
     description: Mapped[str] = mapped_column(String(150))
     author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"))
-    author: Mapped["Author"] = relationship("Author", back_populates="products")
+    author: Mapped["Author"] = relationship("Author")
     price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2))
     discount_price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2))
     stock_quantity: Mapped[int] = mapped_column(Integer)
