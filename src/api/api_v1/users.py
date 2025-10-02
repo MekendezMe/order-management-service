@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, status, Body, HTTPException
-
-from core.config import settings
 from core.dependencies.services import get_user_service
 from core.schemas.user import UserRead, UserCreate, UserLogin
 from core.services.user_service import UserService

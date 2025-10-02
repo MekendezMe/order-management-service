@@ -14,10 +14,10 @@ def model_to_read(user: User) -> UserRead:
         is_active=user.is_active
     )
 
-def create_to_model(user_create: UserCreate, role: Role) -> User:
+def create_to_model(user_create: UserCreate, hashed_password: str, role: Role) -> User:
     return User(
         email=user_create.email,
-        password=user_create.password,
+        password=hashed_password,
         name=user_create.name,
         surname=user_create.surname,
         age=user_create.age,

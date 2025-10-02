@@ -7,12 +7,14 @@ from core.repositories.role_repository import RoleRepository
 from core.repositories.user_repository import UserRepository
 from core.schemas.user import UserCreate, UserRead, UserLogin
 from core.services.mappers.user_mapper import create_to_model, model_to_read
+from utils.password_encryptor import hash_password, verify_password
 
 
 class UserService:
     def __init__(self, user_repository: UserRepository, role_repository: RoleRepository):
         self.user_repository = user_repository
         self.role_repository = role_repository
+
 
     async def register(self, user_create: UserCreate) -> UserRead:
         existing_user = await self.user_repository.get_by_email(user_create.email)
@@ -27,7 +29,9 @@ class UserService:
         if role is None:
             raise RoleNotFoundException()
 
-        user_model = create_to_model(user_create, role=role)
+        hashed_password = hash_password(user_create.password)
+
+        user_model = create_to_model(user_create, hashed_password, role)
 
         new_user = await self.user_repository.create(user_model)
 
@@ -38,7 +42,7 @@ class UserService:
         if existing_user is None:
             raise UserNotFoundException()
 
-        if existing_user.password != user_login.password:
+        if not verify_password(user_login.password, existing_user.password):
             raise IncorrectPasswordException()
 
         return model_to_read(existing_user)
