@@ -22,3 +22,35 @@ class AuthorRepository:
         result = await self.session.scalars(select(Author))
         authors = result.all()
         return authors
+
+    async def create(self, author: Author) -> Author:
+        try:
+            self.session.add(author)
+            await self.session.commit()
+            await self.session.refresh(author)
+            return author
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error creating author: {e}")
+            raise
+
+    async def update(self, author: Author) -> Author:
+        try:
+            await self.session.commit()
+            await self.session.refresh(author)
+            return author
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error updating author: {e}")
+            raise
+
+    async def delete(self, id: int) -> bool:
+        try:
+            author = await self.session.get(Author, id)
+            await self.session.delete(author)
+            await self.session.commit()
+            return True
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error updating author: {e}")
+            raise
