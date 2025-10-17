@@ -55,7 +55,7 @@ class UserRepository:
             return True
         except Exception as e:
             await self.session.rollback()
-            print(f"Error updating user: {e}")
+            print(f"Error deleting user: {e}")
             raise
 
 

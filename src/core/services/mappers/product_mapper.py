@@ -1,15 +1,17 @@
+from typing import Optional
 
 from core.models import Product
+from core.schemas.author import AuthorRead
 from core.schemas.product import ProductRead, ProductCreate, ProductUpdate
 
 
-def model_to_read(product: Product) -> ProductRead:
+def model_to_read(product: Product, author: AuthorRead) -> ProductRead:
     return ProductRead(
         id=product.id,
         article=product.article,
         name=product.name,
         description=product.description,
-        author=product.author.name,
+        author=author,
         price=product.price,
         discount_price=product.discount_price,
         stock_quantity=product.stock_quantity,

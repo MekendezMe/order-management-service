@@ -10,6 +10,7 @@ from core.repositories.author_repository import AuthorRepository
 from core.repositories.product_repository import ProductRepository
 from core.schemas.product import ProductCreate, ProductRead, ProductUpdate
 from core.services.mappers.product_mapper import create_to_model, model_to_read, update_to_model
+from core.services.mappers import author_mapper
 
 
 def generate_article() -> str:
@@ -36,7 +37,7 @@ class ProductService:
                                                          pagination_params=params.pagination_params,
                                                          sort_params=params.sort_params))
 
-        products_read = [model_to_read(product) for product in products]
+        products_read = [model_to_read(product, author_mapper.model_to_read(product.author)) for product in products]
         return products_read
 
     async def create(self, product_create: ProductCreate) -> ProductRead:
@@ -45,11 +46,13 @@ class ProductService:
         author = await self.author_repository.get_by_name(product_create.author)
         if not author:
             raise AuthorNotFoundException()
+
+        converted_author = author_mapper.model_to_read(author)
         article = generate_article()
         product = create_to_model(product_create, article, author.id)
         created_product = await self.product_repository.create(product)
 
-        return model_to_read(created_product)
+        return model_to_read(created_product, converted_author)
 
     async def update(self, id: int, product_update: ProductUpdate):
         await _validate_product_data(product_update)
@@ -60,8 +63,9 @@ class ProductService:
 
         product = update_to_model(product_update, id, article=existed_product.article)
         updated_product = await self.product_repository.update(product)
+        converted_author = author_mapper.model_to_read(updated_product.author)
 
-        return model_to_read(updated_product)
+        return model_to_read(updated_product, converted_author)
 
     async def delete(self, id: int):
         product = await self.product_repository.get_by_id(id)

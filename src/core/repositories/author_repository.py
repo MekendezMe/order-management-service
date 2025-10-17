@@ -53,5 +53,5 @@ class AuthorRepository:
             return True
         except Exception as e:
             await self.session.rollback()
-            print(f"Error updating author: {e}")
+            print(f"Error deleting author: {e}")
             raise

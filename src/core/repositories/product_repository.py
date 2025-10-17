@@ -100,7 +100,7 @@ class ProductRepository:
             return True
         except Exception as e:
             await self.session.rollback()
-            print(f"Error updating product: {e}")
+            print(f"Error deleting product: {e}")
             raise
 
     async def reserve_all(self, product_quantities: list[ProductQuantity]) -> bool:

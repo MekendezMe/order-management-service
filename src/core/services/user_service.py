@@ -12,6 +12,7 @@ from core.schemas.user import UserCreate, UserRead, UserLogin, LoginResponse
 from core.security.tokens_checker import create_access_token
 from core.services.mappers.user_mapper import create_to_model, model_to_read
 from utils.password_encryptor import hash_password, verify_password
+from core.services.mappers import role_mapper
 
 
 class UserService:
@@ -33,13 +34,15 @@ class UserService:
         if role is None:
             raise RoleNotFoundException()
 
+        converted_role = role_mapper.model_to_read(role)
+
         hashed_password = hash_password(user_create.password)
 
         user_model = create_to_model(user_create, hashed_password, role)
 
         new_user = await self.user_repository.create(user_model)
 
-        return model_to_read(new_user)
+        return model_to_read(new_user, converted_role)
 
     async def login(self, user_login: UserLogin) -> LoginResponse:
         user = await self.user_repository.get_by_email(user_login.email)
@@ -54,7 +57,9 @@ class UserService:
             expires_delta=timedelta(minutes=settings.jwt.access_token_expire_minutes)
         )
 
-        return LoginResponse(access_token=access_token, token_type=constants.TOKEN_TYPE, user=model_to_read(user))
+        converted_role = role_mapper.model_to_read(user.role)
+
+        return LoginResponse(access_token=access_token, token_type=constants.TOKEN_TYPE, user=model_to_read(user, converted_role))
 
     async def confirm_email(self, email) -> bool:
         user = await self.user_repository.get_by_email(email)

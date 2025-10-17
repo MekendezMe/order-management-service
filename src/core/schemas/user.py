@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from . import Role
+from core.schemas.role import RoleRead
 
 
 class UserRead(BaseModel):
@@ -9,7 +9,7 @@ class UserRead(BaseModel):
     name: str
     surname: str
     age: int
-    role: str
+    role: RoleRead
     confirmed: bool
     is_active: bool
 

@@ -2,6 +2,9 @@ import decimal
 
 from pydantic import BaseModel
 
+from core.schemas.author import AuthorRead
+
+
 class ProductQuantity(BaseModel):
     product_id: int
     quantity: int
@@ -11,7 +14,7 @@ class ProductRead(BaseModel):
     article: str
     name: str
     description: str
-    author: str
+    author: AuthorRead
     price: decimal.Decimal
     discount_price: decimal.Decimal
     stock_quantity: int

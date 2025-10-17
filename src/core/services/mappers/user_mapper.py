@@ -1,18 +1,20 @@
 from core.models import User, Role
+from core.schemas.role import RoleRead
 from core.schemas.user import UserRead, UserCreate
 
 
-def model_to_read(user: User) -> UserRead:
+def model_to_read(user: User, role: RoleRead) -> UserRead:
     return UserRead(
         id=user.id,
         email=user.email,
         name=user.name,
         surname=user.surname,
         age=user.age,
-        role=user.role.name,
+        role=role,
         confirmed=user.confirmed,
         is_active=user.is_active
     )
+
 
 def create_to_model(user_create: UserCreate, hashed_password: str, role: Role) -> User:
     return User(
