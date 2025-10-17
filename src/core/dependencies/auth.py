@@ -2,12 +2,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from core.dependencies.repositories import get_user_repository
-from core.dependencies.services import get_user_service
 from core.repositories.user_repository import UserRepository
 from core.schemas.user import UserRead
 from core.security.tokens_checker import verify_token
 from core.services.mappers.user_mapper import model_to_read
-from core.services.user_service import UserService
 
 security = HTTPBearer()
 

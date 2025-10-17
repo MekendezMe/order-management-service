@@ -9,8 +9,6 @@ __all__ = (
     "Order",
     "OrderStatus",
     "OrderProduct",
-    "Basket",
-    "BasketStatus",
     "BasketProduct",
 )
 
@@ -25,7 +23,5 @@ from .review import Review
 from .order import Order
 from .order_status import OrderStatus
 from .order_product import OrderProduct
-from .basket import Basket
-from .basket_status import BasketStatus
 from .basket_product import BasketProduct
 

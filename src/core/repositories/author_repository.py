@@ -36,6 +36,7 @@ class AuthorRepository:
 
     async def update(self, author: Author) -> Author:
         try:
+            author = await self.session.merge(author)
             await self.session.commit()
             await self.session.refresh(author)
             return author
