@@ -38,6 +38,7 @@ class UserRepository:
 
     async def update(self, user: User) -> User:
         try:
+            user = await self.session.merge(user)
             await self.session.commit()
             await self.session.refresh(user)
             return user
