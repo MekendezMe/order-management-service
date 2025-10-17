@@ -31,10 +31,10 @@ def create_to_model(product_create: ProductCreate, article: str, author_id: int)
         minimal_age = product_create.minimal_age,
     )
 
-def update_to_model(product_update: ProductUpdate):
+def update_to_model(product_update: ProductUpdate, id: int, article: str):
     return Product(
-        id=product_update.id,
-        article=product_update.article,
+        id=id,
+        article=article,
         name=product_update.name,
         description=product_update.description,
         price=product_update.price,

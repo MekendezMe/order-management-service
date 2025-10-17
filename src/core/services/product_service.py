@@ -8,7 +8,7 @@ from core.exceptions.product import IncorrectAgeException, IncorrectNumberExcept
 from core.exceptions.author import AuthorNotFoundException
 from core.repositories.author_repository import AuthorRepository
 from core.repositories.product_repository import ProductRepository
-from core.schemas.product import ProductCreate, ProductRead, ProductUpdate, ProductQuantity
+from core.schemas.product import ProductCreate, ProductRead, ProductUpdate
 from core.services.mappers.product_mapper import create_to_model, model_to_read, update_to_model
 
 
@@ -51,14 +51,14 @@ class ProductService:
 
         return model_to_read(created_product)
 
-    async def update(self, product_update: ProductUpdate):
+    async def update(self, id: int, product_update: ProductUpdate):
         await _validate_product_data(product_update)
 
-        existed_product = await self.product_repository.get_by_id(product_update.id)
+        existed_product = await self.product_repository.get_by_id(id)
         if not existed_product:
             raise ProductNotFoundException()
 
-        product = update_to_model(product_update)
+        product = update_to_model(product_update, id, article=existed_product.article)
         updated_product = await self.product_repository.update(product)
 
         return model_to_read(updated_product)

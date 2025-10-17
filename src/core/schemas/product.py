@@ -32,5 +32,4 @@ class ProductCreate(ProductBase):
     author: str
 
 class ProductUpdate(ProductBase):
-    id: int
-    article: str
+    ...

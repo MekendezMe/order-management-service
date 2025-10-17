@@ -107,11 +107,11 @@ class ProductRepository:
         try:
             async with self.session.begin():
                 for product_quantity in product_quantities:
-                    product = await self.session.get(Product,product_quantity.product_id,
+                    product = await self.session.get(Product, product_quantity.product_id,
                                                      with_for_update=True)
 
                     if product is None or product.stock_quantity < product_quantity.quantity:
-                        raise NotEnoughStockException(f"Товара {product.name} недостаточно на складе, доступно лишь {product.stock_quantity}")
+                        raise NotEnoughStockException(f"Товара {product.name} недостаточно на складе, доступно лишь {product.stock_quantity} шт.")
 
                     product.stock_quantity -= product_quantity.quantity
 

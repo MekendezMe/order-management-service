@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Body, Depends, HTTPException
+from fastapi import APIRouter, status, Body, Depends, HTTPException, Query, Path
 
 from api.query_params.product_query_params import ProductQueryParams
 from core.dependencies.services import get_product_service
@@ -9,8 +9,8 @@ router = APIRouter(
     tags=["Products"]
 )
 
-@router.post("/create", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
-async def register(
+@router.post("/", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+async def create(
         product_create: ProductCreate = Body(..., description="Данные для создания продукта"),
         product_service: ProductService = Depends(get_product_service)
 ) -> ProductRead:
@@ -22,26 +22,41 @@ async def register(
             detail=str(e)
         )
 
-@router.post("/update", response_model=ProductRead, status_code=status.HTTP_200_OK)
+@router.put("/{id}", response_model=ProductRead, status_code=status.HTTP_200_OK)
 async def update(
+        id: int = Path(ge=1, description="ID продукта"),
         product_update: ProductUpdate = Body(..., description="Данные для обновления продукта"),
         product_service: ProductService = Depends(get_product_service)
 ) -> ProductRead:
     try:
-        return await product_service.update(product_update)
+        return await product_service.update(id, product_update)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
 
-@router.get("/select", response_model=list[ProductRead], status_code=status.HTTP_200_OK)
+@router.get("/get", response_model=list[ProductRead], status_code=status.HTTP_200_OK)
 async def get(
         params: ProductQueryParams = Depends(),
         product_service: ProductService = Depends(get_product_service)
 ) -> list[ProductRead]:
     try:
         return await product_service.get(params)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.delete("/{id}", response_model=bool, status_code=status.HTTP_200_OK)
+async def delete(
+        id: int = Path(ge=1, description="Данные для удаления продукта"),
+        product_service: ProductService = Depends(get_product_service)
+) -> bool:
+    try:
+        return await product_service.delete(id)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
