@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status, Body, HTTPException
+
+from core.dependencies.auth import get_current_user
 from core.dependencies.services import get_user_service
-from core.schemas.user import UserRead, UserCreate, UserLogin
+from core.schemas.user import UserRead, UserCreate, UserLogin, LoginResponse
 from core.services.user_service import UserService
 
 router = APIRouter(
@@ -21,11 +23,11 @@ async def register(
         )
 
 
-@router.post("/login", response_model=UserRead, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 async def login(
         user_login: UserLogin = Body(..., description="Данные для авторизации"),
         user_service: UserService = Depends(get_user_service)
-) -> UserRead:
+) -> LoginResponse:
     try:
         return await user_service.login(user_login)
     except Exception as e:
@@ -37,7 +39,8 @@ async def login(
 @router.post("/confirm-email", response_model=bool, status_code=status.HTTP_200_OK)
 async def confirm_email(
         email: str = Body(...),
-        user_service: UserService =  Depends(get_user_service)
+        user_service: UserService =  Depends(get_user_service),
+        current_user: UserRead = Depends(get_current_user)
 ) -> bool:
     try:
         return await user_service.confirm_email(email)
@@ -46,3 +49,9 @@ async def confirm_email(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+@router.get("/me", response_model=UserRead)
+async def get_me(
+    current_user: UserRead = Depends(get_current_user)
+) -> UserRead:
+    return current_user

@@ -30,6 +30,11 @@ class DatabaseConfig(BaseModel):
         "pk": "pk_%(table_name)s"
     }
 
+class JWTSettings(BaseSettings):
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -40,5 +45,6 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig
+    jwt: JWTSettings
 
 settings = Settings()

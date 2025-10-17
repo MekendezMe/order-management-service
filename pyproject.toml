@@ -13,6 +13,7 @@ alembic = "^1.16.5"
 sqlalchemy2-stubs = "^0.0.2a38"
 passlib = "^1.7.4"
 bcrypt = "^5.0.0"
+python-jose = "^3.5.0"
 
 [dependency-groups]
 dev = [

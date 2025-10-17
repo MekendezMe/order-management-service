@@ -32,3 +32,8 @@ class UserUpdate(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserRead

@@ -1,11 +1,15 @@
+from datetime import timedelta
+
+from core import constants
+from core.config import settings
 from core.constants import ROLE_USER
 from core.exceptions.role import RoleNotFoundException
 from core.exceptions.user import InvalidPasswordLengthException, UserAlreadyExistException, UserNotFoundException, \
     IncorrectPasswordException
-from core.models import User
 from core.repositories.role_repository import RoleRepository
 from core.repositories.user_repository import UserRepository
-from core.schemas.user import UserCreate, UserRead, UserLogin
+from core.schemas.user import UserCreate, UserRead, UserLogin, LoginResponse
+from core.security.tokens_checker import create_access_token
 from core.services.mappers.user_mapper import create_to_model, model_to_read
 from utils.password_encryptor import hash_password, verify_password
 
@@ -18,7 +22,7 @@ class UserService:
 
     async def register(self, user_create: UserCreate) -> UserRead:
         user = await self.user_repository.get_by_email(user_create.email)
-        if not user:
+        if user:
             raise UserAlreadyExistException()
 
         if len(user_create.password) < 8:
@@ -37,7 +41,7 @@ class UserService:
 
         return model_to_read(new_user)
 
-    async def login(self, user_login: UserLogin) -> UserRead:
+    async def login(self, user_login: UserLogin) -> LoginResponse:
         user = await self.user_repository.get_by_email(user_login.email)
         if not user:
             raise UserNotFoundException()
@@ -45,7 +49,12 @@ class UserService:
         if not verify_password(user_login.password, user.password):
             raise IncorrectPasswordException()
 
-        return model_to_read(user)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=timedelta(minutes=settings.jwt.access_token_expire_minutes)
+        )
+
+        return LoginResponse(access_token=access_token, token_type=constants.TOKEN_TYPE, user=model_to_read(user))
 
     async def confirm_email(self, email) -> bool:
         user = await self.user_repository.get_by_email(email)
