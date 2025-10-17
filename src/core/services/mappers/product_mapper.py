@@ -1,6 +1,6 @@
 
 from core.models import Product
-from core.schemas.product import ProductRead, ProductCreate
+from core.schemas.product import ProductRead, ProductCreate, ProductUpdate
 
 
 def model_to_read(product: Product) -> ProductRead:
@@ -30,3 +30,17 @@ def create_to_model(product_create: ProductCreate, article: str, author_id: int)
         image = product_create.image,
         minimal_age = product_create.minimal_age,
     )
+
+def update_to_model(product_update: ProductUpdate):
+    return Product(
+        id=product_update.id,
+        article=product_update.article,
+        name=product_update.name,
+        description=product_update.description,
+        price=product_update.price,
+        discount_price=product_update.discount_price,
+        stock_quantity=product_update.stock_quantity,
+        image=product_update.image,
+        minimal_age=product_update.minimal_age,
+    )
+
