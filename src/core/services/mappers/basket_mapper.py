@@ -1,5 +1,5 @@
 from core.models import BasketProduct, User
-from core.schemas.basket import BasketRead, BasketCreate, BasketForUserResponse, BasketItemWithoutUser
+from core.schemas.basket import BasketRead, BasketCreate, BasketForUserResponse, BasketItemWithoutUser, BasketTotal
 from core.services.mappers import user_mapper, product_mapper
 
 
@@ -27,9 +27,11 @@ def model_to_get_one_from_user(basket: BasketProduct) -> BasketItemWithoutUser:
 
 def model_to_get_all_from_user(
         user: User,
-        products: list[BasketItemWithoutUser]
+        items: list[BasketItemWithoutUser],
+        total: BasketTotal
 ) -> BasketForUserResponse:
     return BasketForUserResponse(
         user=user_mapper.model_to_read(user),
-        products=products
+        items=items,
+        total=total
     )

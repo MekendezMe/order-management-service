@@ -1,10 +1,13 @@
+import decimal
+
 from core.exceptions.basket import IncorrectCountException, BasketNotFoundException
 from core.exceptions.product import ProductNotFoundException
 from core.exceptions.user import UserNotFoundException
+from core.models import BasketProduct
 from core.repositories.basket_repository import BasketRepository
 from core.repositories.product_repository import ProductRepository
 from core.repositories.user_repository import UserRepository
-from core.schemas.basket import BasketRead, BasketCreate, BasketItem, BasketForUserResponse
+from core.schemas.basket import BasketRead, BasketCreate, BasketItem, BasketForUserResponse, BasketTotal
 from core.services.mappers.basket_mapper import create_to_model, model_to_read, model_to_get_one_from_user, \
     model_to_get_all_from_user
 
@@ -85,11 +88,19 @@ class BasketService:
 
         user_items = await self.basket_repository.get_user_items(user_id)
 
+
+        items_without_user = []
+        for item in user_items:
+            items_without_user.append(model_to_get_one_from_user(item))
+
         items_without_user = [model_to_get_one_from_user(item) for item in user_items]
+
+        total_data = _get_total_data(user_items)
 
         return model_to_get_all_from_user(
             user=user,
-            products=items_without_user
+            items=items_without_user,
+            total=total_data
         )
 
 
@@ -98,3 +109,26 @@ def _validate_basket_data(
 ):
     if count <= 0:
         raise IncorrectCountException()
+
+
+def _get_total_data(user_items: list[BasketProduct]) -> BasketTotal:
+    price = decimal.Decimal(0)
+    discount_price = decimal.Decimal(0)
+    total_saved = decimal.Decimal(0)
+    count: int = 0
+    for item in user_items:
+        if not item.product or not item.product.is_active:
+            continue
+
+        price += item.product.price * item.count
+        discount_price += item.product.discount_price * item.count
+        count += item.count
+
+    total_saved = price - discount_price
+
+    return BasketTotal(
+        price=price,
+        discount_price=discount_price,
+        count=count,
+        total_saved=total_saved
+    )

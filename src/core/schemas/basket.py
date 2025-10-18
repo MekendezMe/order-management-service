@@ -1,3 +1,5 @@
+import decimal
+
 from pydantic import BaseModel
 
 from core.schemas.product import ProductRead
@@ -24,6 +26,14 @@ class BasketItemWithoutUser(BaseModel):
     product: ProductRead
     count: int
 
+class BasketTotal(BaseModel):
+    count: int
+    price: decimal.Decimal
+    discount_price: decimal.Decimal
+    total_saved: decimal.Decimal
+
 class BasketForUserResponse(BaseModel):
     user: UserRead
-    products: list[BasketItemWithoutUser]
+    items: list[BasketItemWithoutUser]
+    total: BasketTotal
+
