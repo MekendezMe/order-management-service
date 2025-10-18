@@ -1,5 +1,3 @@
-import decimal
-
 from pydantic import BaseModel
 
 from core.schemas.product import ProductRead
@@ -11,4 +9,21 @@ class BasketRead(BaseModel):
     product: ProductRead
     user: UserRead
     count: int
-    price: decimal.Decimal
+
+class BasketCreate(BaseModel):
+    product_id: int
+    user_id: int
+    count: int
+
+class BasketItem(BaseModel):
+    user_id: int
+    product_id: int
+
+class BasketItemWithoutUser(BaseModel):
+    id: int
+    product: ProductRead
+    count: int
+
+class BasketForUserResponse(BaseModel):
+    user: UserRead
+    products: list[BasketItemWithoutUser]

@@ -53,4 +53,4 @@ async def get_current_user(
             detail="User inactive"
         )
 
-    return model_to_read(user, role_mapper.model_to_read(user.role))
+    return model_to_read(user)

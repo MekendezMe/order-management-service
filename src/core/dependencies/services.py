@@ -24,6 +24,8 @@ async def get_product_service(
     return ProductService(product_repository, author_repository)
 
 async def get_basket_service(
-        basket_repository: BasketRepository = Depends(get_basket_repository)
+        basket_repository: BasketRepository = Depends(get_basket_repository),
+        user_repository: UserRepository = Depends(get_user_repository),
+        product_repository: ProductRepository = Depends(get_product_repository),
 ) -> BasketService:
-    return BasketService(basket_repository)
+    return BasketService(basket_repository, user_repository, product_repository)

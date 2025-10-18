@@ -10,6 +10,7 @@ class ApiV1Prefix(BaseModel):
     prefix: str = "/v1"
     users: str = "/users"
     products: str = "/products"
+    baskets: str = "/baskets"
 
 class ApiPrefix(BaseModel):
     prefix: str = "/api"
@@ -18,7 +19,7 @@ class ApiPrefix(BaseModel):
 
 class DatabaseConfig(BaseModel):
     url: PostgresDsn
-    echo: bool = True
+    echo: bool = False
     echo_pool: bool = False
     pool_size: int = 50
     max_overflow: int = 10

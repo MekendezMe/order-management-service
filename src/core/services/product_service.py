@@ -10,7 +10,6 @@ from core.repositories.author_repository import AuthorRepository
 from core.repositories.product_repository import ProductRepository
 from core.schemas.product import ProductCreate, ProductRead, ProductUpdate
 from core.services.mappers.product_mapper import create_to_model, model_to_read, update_to_model
-from core.services.mappers import author_mapper
 
 
 def generate_article() -> str:
@@ -37,25 +36,24 @@ class ProductService:
                                                          pagination_params=params.pagination_params,
                                                          sort_params=params.sort_params))
 
-        products_read = [model_to_read(product, author_mapper.model_to_read(product.author)) for product in products]
+        products_read = [model_to_read(product) for product in products]
         return products_read
 
     async def create(self, product_create: ProductCreate) -> ProductRead:
-        await _validate_product_data(product_create)
+        _validate_product_data(product_create)
 
-        author = await self.author_repository.get_by_name(product_create.author)
+        author = await self.author_repository.get_by_id(product_create.author_id)
         if not author:
             raise AuthorNotFoundException()
 
-        converted_author = author_mapper.model_to_read(author)
         article = generate_article()
         product = create_to_model(product_create, article, author.id)
         created_product = await self.product_repository.create(product)
 
-        return model_to_read(created_product, converted_author)
+        return model_to_read(created_product)
 
     async def update(self, id: int, product_update: ProductUpdate):
-        await _validate_product_data(product_update)
+        _validate_product_data(product_update)
 
         existed_product = await self.product_repository.get_by_id(id)
         if not existed_product:
@@ -63,9 +61,8 @@ class ProductService:
 
         product = update_to_model(product_update, id, article=existed_product.article)
         updated_product = await self.product_repository.update(product)
-        converted_author = author_mapper.model_to_read(updated_product.author)
 
-        return model_to_read(updated_product, converted_author)
+        return model_to_read(updated_product)
 
     async def delete(self, id: int):
         product = await self.product_repository.get_by_id(id)
@@ -75,7 +72,7 @@ class ProductService:
         return await self.product_repository.delete(id)
 
 
-async def _validate_product_data(
+def _validate_product_data(
         product_data: Union[ProductCreate, ProductUpdate],
 ):
     if not 0 <= product_data.minimal_age <= MAX_AGE:

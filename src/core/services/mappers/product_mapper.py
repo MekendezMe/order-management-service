@@ -3,15 +3,16 @@ from typing import Optional
 from core.models import Product
 from core.schemas.author import AuthorRead
 from core.schemas.product import ProductRead, ProductCreate, ProductUpdate
+from core.services.mappers import author_mapper
 
 
-def model_to_read(product: Product, author: AuthorRead) -> ProductRead:
+def model_to_read(product: Product) -> ProductRead:
     return ProductRead(
         id=product.id,
         article=product.article,
         name=product.name,
         description=product.description,
-        author=author,
+        author=author_mapper.model_to_read(product.author),
         price=product.price,
         discount_price=product.discount_price,
         stock_quantity=product.stock_quantity,

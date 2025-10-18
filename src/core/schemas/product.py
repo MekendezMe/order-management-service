@@ -32,7 +32,7 @@ class ProductBase(BaseModel):
     minimal_age: int
 
 class ProductCreate(ProductBase):
-    author: str
+    author_id: int
 
 class ProductUpdate(ProductBase):
     ...

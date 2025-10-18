@@ -11,4 +11,3 @@ class BasketProduct(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     product: Mapped["Product"] = relationship("Product")
     count: Mapped[int] = mapped_column(Integer)
-    price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2))

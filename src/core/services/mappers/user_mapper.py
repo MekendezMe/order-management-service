@@ -1,16 +1,16 @@
 from core.models import User, Role
-from core.schemas.role import RoleRead
 from core.schemas.user import UserRead, UserCreate
+from core.services.mappers import role_mapper
 
 
-def model_to_read(user: User, role: RoleRead) -> UserRead:
+def model_to_read(user: User) -> UserRead:
     return UserRead(
         id=user.id,
         email=user.email,
         name=user.name,
         surname=user.surname,
         age=user.age,
-        role=role,
+        role=role_mapper.model_to_read(user.role),
         confirmed=user.confirmed,
         is_active=user.is_active
     )
