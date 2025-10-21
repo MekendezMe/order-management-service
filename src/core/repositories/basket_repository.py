@@ -83,12 +83,12 @@ class BasketRepository:
             print(f"Error deleting basket: {e}")
             raise
 
-    async def clear_user_basket(self, user_id: int) -> int:
+    async def clear_user_basket(self, user_id: int) -> bool:
         try:
             statement = delete(BasketProduct).where(BasketProduct.user_id == user_id)
-            result = await self.session.execute(statement)
+            await self.session.execute(statement)
             await self.session.commit()
-            return len(result.scalars().all())
+            return True
         except Exception as e:
             await self.session.rollback()
             print("Error deleting user items:", e)

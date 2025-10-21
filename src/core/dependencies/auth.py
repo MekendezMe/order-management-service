@@ -5,7 +5,6 @@ from core.dependencies.repositories import get_user_repository
 from core.repositories.user_repository import UserRepository
 from core.schemas.user import UserRead
 from core.security.tokens_checker import verify_token
-from core.services.mappers import role_mapper
 from core.services.mappers.user_mapper import model_to_read
 
 security = HTTPBearer()

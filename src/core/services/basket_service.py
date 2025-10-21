@@ -1,7 +1,7 @@
 import decimal
 
 from core.exceptions.basket import IncorrectCountException, BasketNotFoundException
-from core.exceptions.product import ProductNotFoundException
+from core.exceptions.product import ProductNotFoundException, NotEnoughStockException, LowAgeException
 from core.exceptions.user import UserNotFoundException
 from core.models import BasketProduct
 from core.repositories.basket_repository import BasketRepository
@@ -32,11 +32,19 @@ class BasketService:
         if not product:
             raise ProductNotFoundException(f"Продукт с id {basket_create.product_id} не существует")
 
+        if user.age < product.minimal_age:
+            raise LowAgeException()
+
+        if product.stock_quantity < basket_create.count:
+            raise NotEnoughStockException()
+
         product_in_basket = await (self.basket_repository.
                                    get_by_user_and_product(basket_create.user_id,
                                                            basket_create.product_id))
         if product_in_basket:
             product_in_basket.count = product_in_basket.count + basket_create.count
+            if product.stock_quantity < product_in_basket.count:
+                raise NotEnoughStockException()
             updated_basket = await self.basket_repository.update(product_in_basket)
             return model_to_read(updated_basket)
         else:
@@ -44,7 +52,7 @@ class BasketService:
             created_basket = await self.basket_repository.create(basket)
             return model_to_read(created_basket)
 
-    async def update(self, id: int, count: int):
+    async def update(self, id: int, count: int) -> BasketRead:
         _validate_basket_data(count)
 
         existed_basket = await self.basket_repository.get_by_id(id)
@@ -56,14 +64,14 @@ class BasketService:
 
         return model_to_read(updated_basket)
 
-    async def delete(self, id: int):
+    async def delete(self, id: int) -> bool:
         basket = await self.basket_repository.get_by_id(id)
         if not basket:
             raise BasketNotFoundException()
 
         return await self.basket_repository.delete(id)
 
-    async def delete_basket_item(self, basket_item: BasketItem):
+    async def delete_basket_item(self, basket_item: BasketItem) -> bool:
         user = await self.user_repository.get_by_id(basket_item.user_id)
         if not user:
             raise UserNotFoundException(f"Пользователь с id {basket_item.user_id} не существует")
@@ -79,8 +87,15 @@ class BasketService:
 
         return await self.basket_repository.clear_item_in_user_basket(basket_item.user_id, basket_item.product_id)
 
+    async def delete_all_items(self, user_id: int) -> bool:
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"Пользователь с id {user_id} не существует")
 
-    async def get_user_items(self, user_id: int):
+        return await self.basket_repository.clear_user_basket(user_id)
+
+
+    async def get_user_items(self, user_id: int) -> BasketForUserResponse:
 
         user = await self.user_repository.get_by_id(user_id)
         if not user:

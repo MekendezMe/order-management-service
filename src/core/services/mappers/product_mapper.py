@@ -1,7 +1,4 @@
-from typing import Optional
-
 from core.models import Product
-from core.schemas.author import AuthorRead
 from core.schemas.product import ProductRead, ProductCreate, ProductUpdate
 from core.services.mappers import author_mapper
 

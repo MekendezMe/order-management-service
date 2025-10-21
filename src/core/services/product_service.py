@@ -1,6 +1,6 @@
 import random
 import string
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
 from api.query_params.product_query_params import ProductQueryParams
 from core.constants import MAX_AGE

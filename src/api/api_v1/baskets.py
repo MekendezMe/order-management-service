@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Body, Path, Query, HTTPException
+from fastapi import APIRouter, Depends, status, Body, Path, HTTPException
 
 from core.dependencies.auth import get_current_user
 from core.dependencies.services import get_basket_service
@@ -64,13 +64,26 @@ async def delete(
             detail=str(e)
         )
 
-@router.post("/remove", response_model=bool, status_code=status.HTTP_200_OK)
+@router.post("/removeItem", response_model=bool, status_code=status.HTTP_200_OK)
 async def remove_item_from_basket(
         basket_item: BasketItem = Body(..., description="Данные для удаления конкретного товара из корзины"),
         basket_service: BasketService = Depends(get_basket_service),
 ) -> bool:
     try:
         return await basket_service.delete_basket_item(basket_item)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.post("/removeAllItems/{user_id}", response_model=bool, status_code=status.HTTP_200_OK)
+async def remove_all_items_from_basket(
+        user_id: int = Path(ge=1),
+        basket_service: BasketService = Depends(get_basket_service),
+) -> bool:
+    try:
+        return await basket_service.delete_all_items(user_id)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

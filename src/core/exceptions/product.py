@@ -13,3 +13,7 @@ class ProductNotFoundException(Exception):
 class NotEnoughStockException(Exception):
     def __init__(self, message: str = "Недостаточно товара на складе"):
         super().__init__(message)
+
+class LowAgeException(Exception):
+    def __init__(self, message: str = "Неподходящий возраст под выбранный товар"):
+        super().__init__(message)
