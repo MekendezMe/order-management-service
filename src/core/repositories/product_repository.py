@@ -105,17 +105,15 @@ class ProductRepository:
 
     async def reserve_all(self, product_quantities: list[ProductQuantity]) -> bool:
         try:
-            async with self.session.begin():
-                for product_quantity in product_quantities:
-                    product = await self.session.get(Product, product_quantity.product_id,
-                                                     with_for_update=True)
+            for product_quantity in product_quantities:
+                product = await self.session.get(Product, product_quantity.product_id)
 
-                    if product is None or product.stock_quantity < product_quantity.quantity:
-                        raise NotEnoughStockException(f"Товара {product.name} недостаточно на складе, доступно лишь {product.stock_quantity} шт.")
+                if product is None or product.stock_quantity < product_quantity.quantity:
+                    raise NotEnoughStockException(f"Товара {product.name} недостаточно на складе, доступно лишь {product.stock_quantity} шт.")
 
-                    product.stock_quantity -= product_quantity.quantity
+                product.stock_quantity -= product_quantity.quantity
 
-                return True
+            return True
         except NotEnoughStockException:
             await self.session.rollback()
             return False

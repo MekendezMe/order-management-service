@@ -12,3 +12,8 @@ class OrderProductRead(BaseModel):
     product: ProductRead
     count: int
     price: decimal.Decimal
+
+class OrderProductUpdate(BaseModel):
+    product_id: int
+    count: int
+    price: decimal.Decimal

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -88,4 +88,15 @@ class OrderProductRepository:
         except Exception as e:
             await self.session.rollback()
             print(f"Error deleting order product: {e}")
+            raise
+
+    async def delete_many_by_order(self, order_id: int) -> bool:
+        try:
+            statement = delete(OrderProduct).where(OrderProduct.order_id == order_id)
+            await self.session.execute(statement)
+            await self.session.commit()
+            return True
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error deleting order products: {e}")
             raise

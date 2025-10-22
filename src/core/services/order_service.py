@@ -2,7 +2,7 @@ import decimal
 
 from core.exceptions.basket import BasketNotFoundException
 from core.exceptions.order import OrderNotFoundException
-from core.exceptions.order_product import OrderProductCreateManyException
+from core.exceptions.order_product import OrderProductCreateManyException, OrderProductDeleteManyException
 from core.exceptions.product import ProductNotFoundException, NotEnoughStockException
 from core.exceptions.status import StatusNotFoundException
 from core.exceptions.user import UserNotFoundException
@@ -14,6 +14,8 @@ from core.repositories.product_repository import ProductRepository
 from core.repositories.status_repository import StatusRepository
 from core.repositories.user_repository import UserRepository
 from core.schemas.order import OrderCreate, OrderRead, OrderItemCreate, OrderWithProducts
+from core.schemas.order_product import OrderProductUpdate
+from core.schemas.product import ProductQuantity
 from core.services.mappers.order_mapper import create_to_model, model_to_read, model_to_order_with_products, \
     models_to_read
 from core.services.mappers.order_product_mapper import models_to_read_without_order_id
@@ -39,8 +41,9 @@ class OrderService:
         if not user:
             raise UserNotFoundException(f"Пользователь с id {order_create.user_id} не существует")
 
-        total_price = decimal.Decimal(0)
+        product_updates: list[OrderProductUpdate] = []
         total_count: int = 0
+        total_price = decimal.Decimal(0)
 
         for item in order_create.items:
             product = await self.product_repository.get_by_id(item.product_id)
@@ -50,7 +53,12 @@ class OrderService:
                 raise NotEnoughStockException()
             if await self.basket_repository.get_by_user_and_product(order_create.user_id, item.product_id) is None:
                 raise BasketNotFoundException()
-            total_price += product.discount_price
+            product_updates.append(OrderProductUpdate(
+                product_id=item.product_id,
+                count=item.count,
+                price=product.discount_price
+            ))
+            total_price += product.discount_price * item.count
             total_count += item.count
 
 
@@ -58,18 +66,34 @@ class OrderService:
         created_order = await self.order_repository.create(order)
         order_products: list[OrderProduct] = []
 
-        for item in order_create.items:
+        for item in product_updates:
             order_item = OrderProduct(
                 order_id=created_order.id,
                 product_id=item.product_id,
                 count=item.count,
-                price=item.price
+                price=item.price * item.count
             )
             order_products.append(order_item)
 
         created_order_products = await self.order_product_repository.create_many(created_order.id, order_products)
         if not created_order_products:
             raise OrderProductCreateManyException()
+
+
+        product_quantities = [
+            ProductQuantity(
+                product_id=item.product_id,
+                quantity=item.count
+            )
+            for item in order_create.items
+        ]
+
+        print(*order_create.items)
+
+        products_updated = await self.product_repository.reserve_all(product_quantities)
+
+        if not products_updated:
+            raise NotEnoughStockException()
 
         converted_order_products = models_to_read_without_order_id(created_order_products)
 
@@ -100,6 +124,11 @@ class OrderService:
         order = await self.order_repository.get_by_id(id)
         if not order:
             raise OrderNotFoundException()
+
+        order_products_deleted = await self.order_product_repository.delete_many_by_order(id)
+
+        if not order_products_deleted:
+            raise OrderProductDeleteManyException()
 
         return await self.order_repository.delete(id)
 
