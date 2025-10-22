@@ -58,11 +58,11 @@ class OrderProductRepository:
             print(f"Error creating order product: {e}")
             raise
 
-    async def create_many(self, order_products: list[OrderProduct]) -> list[OrderProduct]:
+    async def create_many(self, order_id: int, order_products: list[OrderProduct]) -> list[OrderProduct]:
         try:
             self.session.add_all(order_products)
             await self.session.commit()
-            return order_products
+            return await self.get_order_products(order_id)
         except Exception as e:
             await self.session.rollback()
             print(f"Error creating order products: {e}")

@@ -14,7 +14,6 @@ from core.repositories.product_repository import ProductRepository
 from core.repositories.status_repository import StatusRepository
 from core.repositories.user_repository import UserRepository
 from core.schemas.order import OrderCreate, OrderRead, OrderItemCreate, OrderWithProducts
-from core.schemas.order_product import OrderProductWithoutOrderId
 from core.services.mappers.order_mapper import create_to_model, model_to_read, model_to_order_with_products, \
     models_to_read
 from core.services.mappers.order_product_mapper import models_to_read_without_order_id
@@ -42,7 +41,6 @@ class OrderService:
 
         total_price = decimal.Decimal(0)
         total_count: int = 0
-        order_items: list[OrderItemCreate] = []
 
         for item in order_create.items:
             product = await self.product_repository.get_by_id(item.product_id)
@@ -52,15 +50,8 @@ class OrderService:
                 raise NotEnoughStockException()
             if await self.basket_repository.get_by_user_and_product(order_create.user_id, item.product_id) is None:
                 raise BasketNotFoundException()
-            total_price += item.price
+            total_price += product.discount_price
             total_count += item.count
-            order_items.append(
-                OrderItemCreate(
-                    product_id=item.product_id,
-                    price=item.price,
-                    count=item.count
-                )
-            )
 
 
         order = create_to_model(order_create.user_id, price=total_price, count=total_count)
@@ -76,13 +67,14 @@ class OrderService:
             )
             order_products.append(order_item)
 
-        created_order_products = await self.order_product_repository.create_many(order_products)
+        created_order_products = await self.order_product_repository.create_many(created_order.id, order_products)
         if not created_order_products:
             raise OrderProductCreateManyException()
 
         converted_order_products = models_to_read_without_order_id(created_order_products)
 
-        converted_order = model_to_read(created_order)
+        order_with_user = await self.order_repository.get_by_id(created_order.id)
+        converted_order = model_to_read(order_with_user)
 
         return model_to_order_with_products(converted_order, converted_order_products)
 
@@ -140,7 +132,7 @@ class OrderService:
             order_products = await self.order_product_repository.get_order_products(order.id)
             converted_order_products = models_to_read_without_order_id(order_products)
             order_with_products.append(OrderWithProducts(
-                **order.dict(),
+                order=order,
                 products=converted_order_products
             ))
 

@@ -12,9 +12,3 @@ class OrderProductRead(BaseModel):
     product: ProductRead
     count: int
     price: decimal.Decimal
-
-class OrderProductWithoutOrderId(BaseModel):
-    id: int
-    product: ProductRead
-    count: int
-    price: decimal.Decimal
