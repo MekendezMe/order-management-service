@@ -47,7 +47,7 @@ class OrderRepository:
         order = result.scalar_one_or_none()
         return order
 
-    async def get_all_by_user_and_status(self, user_id: int, status_id: int) -> list[Order] | []:
+    async def get_all_by_user_and_status(self, user_id: int, status_id: int) -> list[Order]:
         result = await self.session.execute(select(Order).
                                             options(joinedload(Order.user).joinedload(User.role)).
                                             options(joinedload(Order.status)).

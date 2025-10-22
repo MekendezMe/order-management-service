@@ -129,7 +129,6 @@ def _validate_basket_data(
 def _get_total_data(user_items: list[BasketProduct]) -> BasketTotal:
     price = decimal.Decimal(0)
     discount_price = decimal.Decimal(0)
-    total_saved = decimal.Decimal(0)
     count: int = 0
     for item in user_items:
         if not item.product or not item.product.is_active:

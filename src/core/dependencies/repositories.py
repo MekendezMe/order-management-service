@@ -6,8 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.models.db_helper import db_helper
 from core.repositories.author_repository import AuthorRepository
 from core.repositories.basket_repository import BasketRepository
+from core.repositories.order_product_repository import OrderProductRepository
+from core.repositories.order_repository import OrderRepository
 from core.repositories.product_repository import ProductRepository
 from core.repositories.role_repository import RoleRepository
+from core.repositories.status_repository import StatusRepository
 from core.repositories.user_repository import UserRepository
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
@@ -39,3 +42,19 @@ async def get_basket_repository(
         session: AsyncSession = Depends(get_async_session)
 ) -> BasketRepository:
     return BasketRepository(session)
+
+
+async def get_order_repository(
+        session: AsyncSession = Depends(get_async_session)
+) -> OrderRepository:
+    return OrderRepository(session)
+
+async def get_order_status_repository(
+        session: AsyncSession = Depends(get_async_session)
+) -> StatusRepository:
+    return StatusRepository(session)
+
+async def get_order_product_repository(
+        session: AsyncSession = Depends(get_async_session)
+) -> OrderProductRepository:
+    return OrderProductRepository(session)
