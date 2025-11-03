@@ -6,6 +6,7 @@ __all__ = (
     "Author",
     "Product",
     "Review",
+    "ReviewFile",
     "Order",
     "OrderStatus",
     "OrderProduct",
@@ -24,4 +25,5 @@ from .order import Order
 from .order_status import OrderStatus
 from .order_product import OrderProduct
 from .basket_product import BasketProduct
+from .review_file import ReviewFile
 
